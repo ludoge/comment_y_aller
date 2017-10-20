@@ -238,8 +238,9 @@ namespace comment_y_aller.Controllers
             }
             catch (ArgumentOutOfRangeException)
             {
-                throw;
+                //throw;
                 //return 1000000;
+                return Route.routes[0].legs[0].duration.value;
             }
         }
 
