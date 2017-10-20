@@ -10,6 +10,12 @@ namespace comment_y_aller.Controllers
 {
     public class HomeController : Controller
     {
+        private string AboutMessage()
+        {
+            return "About this project";
+        }
+
+
         public IActionResult Index()
         {
             return View();
@@ -17,7 +23,8 @@ namespace comment_y_aller.Controllers
 
         public IActionResult About()
         {
-            ViewData["Message"] = "About this project";
+            ViewData["Title"] = "About";
+            ViewData["Message"] = AboutMessage();
 
             return View();
         }

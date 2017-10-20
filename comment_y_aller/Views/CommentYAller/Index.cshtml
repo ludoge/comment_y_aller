@@ -1,0 +1,24 @@
+﻿
+@{
+    ViewData["Title"] = "View";
+}
+
+<h2>Comment y aller ?</h2>
+
+<form action="/CommentYAller/Coordinates" method="post">
+    <h4>Point de départ: </h4>
+    <p>
+        <input type="text" name="latitude_depart" value="48,000" />
+        <input type="text" name="longitude_depart" value="2,000" />
+    </p>
+
+
+    <h4>Point d'arrivée: </h4>
+    <p>
+        <input type="text" name="latitude_arriv" value="48,000" />
+        <input type="text" name="longitude_arriv" value="2,000" />
+    </p>
+
+    <input type="submit" value="Comment y aller ?" />
+</form>
+
