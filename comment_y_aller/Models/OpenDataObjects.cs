@@ -85,5 +85,18 @@ namespace comment_y_aller.Models
             fields.position.Add(lon);
             fields.geo_point.Add(lon);
         }
+        public Record(decimal lat, decimal lon)
+        {
+            fields = new Fields();
+
+            fields.position = new List<double>();
+            fields.geo_point = new List<double>();
+
+            fields.position.Add((double)lat);
+            fields.geo_point.Add((double)lat);
+
+            fields.position.Add((double)lon);
+            fields.geo_point.Add((double)lon);
+        }
     }
 }

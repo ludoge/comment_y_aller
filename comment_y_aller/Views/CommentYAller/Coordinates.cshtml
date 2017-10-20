@@ -1,14 +1,32 @@
 ﻿
 @{
     ViewData["Title"] = "Coordonnées";
+    String advice;
+    switch (ViewData["mode"])
+    {
+        case "bicycling":
+            advice = "vélib";
+            break;
+        case "driving":
+            advice = "autolib";
+            break;
+        default:
+            advice = "téléportation";
+            break;
+    }
 }
 
-<h2>Coordonnées</h2>
+<h2>Je te conseille d'y aller en
+    @advice
+    !
+    </h2>
 
-<p>
-    Point de départ: @ViewData["latitude_depart"] ;  @ViewData["longitude_depart"]
-</p>
+@ViewData["mode"]
 
-<p>
-    Point d'arrivée: @ViewData["latitude_arriv"] ;  @ViewData["longitude_arriv"]
-</p>
+<h3>Instructions: </h3>
+
+
+    @foreach (string instruction in (List<String>)ViewData["Instructions"])
+    {
+        <p>@instruction</p>
+    }
