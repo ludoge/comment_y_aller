@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -159,6 +160,16 @@ namespace comment_y_aller.Controllers
             //Console.WriteLine(response);
             var requestObject = JsonConvert.DeserializeObject<MapsRootObject>(response);
 
+            try
+            {
+                Double dummy = requestObject.routes[0].legs[0].start_location.lat;
+            }
+            catch (IndexOutOfRangeException)
+            {
+                System.Diagnostics.Debug.WriteLine(url);
+                throw;
+            }
+
             return requestObject;
         }
         public static MapsRootObject GetRoute(List<Double> Depart, Record Arrivee, string mode)
@@ -189,6 +200,17 @@ namespace comment_y_aller.Controllers
             string arrivee = Arrivee[0].ToString().Replace(',', '.') + "," + Arrivee[1].ToString().Replace(',', '.');
             return GetRoute(depart, arrivee, mode);
         }
+        public static MapsRootObject GetRoute(List<Double> Depart, string arrivee, string mode)
+        {
+            string depart = Depart[0].ToString().Replace(',', '.') + "," + Depart[1].ToString().Replace(',', '.');
+            return GetRoute(depart, arrivee, mode);
+        }
+        public static MapsRootObject GetRoute(string depart, List<Double> Arrivee, string mode)
+        {
+            string arrivee = Arrivee[0].ToString().Replace(',', '.') + "," + Arrivee[1].ToString().Replace(',', '.');
+            return GetRoute(depart, arrivee, mode);
+        }
+
 
         public static List<MapsRootObject> GetPossibleRoutes(List<Record> DeparturePoints, List<Record> ArrivalPoints)
         {
@@ -229,6 +251,8 @@ namespace comment_y_aller.Controllers
             MapsRootObject RouteApres = new MapsRootObject();
             List<Double> StationDepart = new List<Double> { Route.routes[0].legs[0].start_location.lat, Route.routes[0].legs[0].start_location.lng};
             List<Double> StationArrivee = new List<Double> { Route.routes.Last().legs.Last().end_location.lat, Route.routes.Last().legs.Last().end_location.lng };
+            //string stationArrivee = Route.routes[0].legs[0].start_location
+
             RouteAvant = GetRoute(depart, StationDepart, "walking");
             RouteApres = GetRoute(StationArrivee, arrivee, "walking");
             try
@@ -238,9 +262,9 @@ namespace comment_y_aller.Controllers
             }
             catch (ArgumentOutOfRangeException)
             {
-                //throw;
+                throw;
                 //return 1000000;
-                return Route.routes[0].legs[0].duration.value;
+                //return Route.routes[0].legs[0].duration.value;
             }
         }
 
