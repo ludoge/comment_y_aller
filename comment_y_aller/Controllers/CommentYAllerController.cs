@@ -249,24 +249,41 @@ namespace comment_y_aller.Controllers
         {
             MapsRootObject RouteAvant = new MapsRootObject();
             MapsRootObject RouteApres = new MapsRootObject();
-            List<Double> StationDepart = new List<Double> { Route.routes[0].legs[0].start_location.lat, Route.routes[0].legs[0].start_location.lng};
-            List<Double> StationArrivee = new List<Double> { Route.routes.Last().legs.Last().end_location.lat, Route.routes.Last().legs.Last().end_location.lng };
-            //string stationArrivee = Route.routes[0].legs[0].start_location
+            //Record StationDepart = new Record(Route.routes[0].legs[0].start_location.lat, Route.routes[0].legs[0].start_location.lng);
+            //Record StationArrivee = new Record(Route.routes[0].legs[0].end_location.lat, Route.routes[0].legs[0].end_location.lng);
+            //RouteAvant = GetRoute(depart, StationDepart, "walking");
+            //RouteApres = GetRoute(StationArrivee, arrivee, "walking");
+            int cost = 0;
+            foreach (Route route in Route.routes)
+            {
+                foreach (Leg leg in route.legs)
+                {
+                    cost += leg.duration.value;
+                }
+            }
+            return cost;
+            //return Route.routes[0].legs[0].duration.value + RouteAvant.routes[0].legs[0].duration.value + RouteApres.routes[0].legs[0].duration.value;
+        }
 
-            RouteAvant = GetRoute(depart, StationDepart, "walking");
-            RouteApres = GetRoute(StationArrivee, arrivee, "walking");
+        public static MapsRootObject CompleteRoute(MapsRootObject Route, Record start, Record finish)
+        {
             try
             {
-                return Route.routes[0].legs[0].duration.value + RouteAvant.routes[0].legs[0].duration.value + RouteApres.routes[0].legs[0].duration.value;
+                List<Double> RouteStartingPoint = new List<double> { Route.routes[0].legs[0].start_location.lat, Route.routes[0].legs[0].start_location.lng };
+                List<Double> RouteArrivalPoint = new List<double> { Route.routes.Last().legs.Last().end_location.lat, Route.routes.Last().legs.Last().end_location.lng };
+                MapsRootObject RouteBefore = GetRoute(start, RouteStartingPoint, "walking");
+                MapsRootObject RouteAfter = GetRoute(RouteArrivalPoint, finish, "walking");
+
+                Route.routes[0].legs.Insert(0, RouteBefore.routes[0].legs[0]);
+                Route.routes[0].legs.Add(RouteAfter.routes[0].legs[0]);
 
             }
-            catch (ArgumentOutOfRangeException)
+            catch (Exception)
             {
-                throw;
-                //return 1000000;
-                //return Route.routes[0].legs[0].duration.value;
             }
+            return Route;
         }
+
 
         static MapsRootObject MeilleureRoute(List<MapsRootObject> Routes, Record depart, Record arrivee)
         {
@@ -276,7 +293,7 @@ namespace comment_y_aller.Controllers
 
             Result = Result.Take(1).ToList();
 
-            return Result[0];
+            return CompleteRoute(Result[0], depart, arrivee);
         }
 
         public IActionResult Index()
@@ -316,7 +333,8 @@ namespace comment_y_aller.Controllers
 
             MapsRootObject BestRoute = MeilleureRoute(Routes, Departure, Arrival);
 
-            String mode = BestRoute.routes[0].legs[0].steps[0].travel_mode.ToLower();
+            
+            String mode = BestRoute.routes[0].legs[1].steps[0].travel_mode.ToLower();
             ViewData["mode"] = mode;
 
             List<String> Instructions = new List<String>();
@@ -327,7 +345,7 @@ namespace comment_y_aller.Controllers
                     Instructions.Add(step.html_instructions);
                 }
             }
-            ViewData["Instructions"] = Instructions;
+            ViewData["Route"] = BestRoute;
 
             return View();
         }

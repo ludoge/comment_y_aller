@@ -1,7 +1,8 @@
-﻿
+﻿@using comment_y_aller.Models;
 @{
     ViewData["Title"] = "Coordonnées";
     String advice;
+    MapsRootObject Route = (MapsRootObject)ViewData["Route"];
     switch (ViewData["mode"])
     {
         case "bicycling":
@@ -21,12 +22,16 @@
     !
     </h2>
 
-@ViewData["mode"]
 
 <h3>Instructions: </h3>
 
-
-    @foreach (string instruction in (List<String>)ViewData["Instructions"])
+    @foreach (Route route in Route.routes)
     {
-        <p>@instruction</p>
+        @foreach (Leg leg in route.legs)
+        {
+            @foreach (Step step in leg.steps)
+            {
+                <p>@Html.Raw(step.html_instructions)</p>
+            }
+        }
     }
