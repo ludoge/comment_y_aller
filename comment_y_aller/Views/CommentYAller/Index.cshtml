@@ -4,13 +4,13 @@
 }
 
 <h2>Comment y aller ?</h2>
-<h3>Implémentés: Vélib, Autolib</h3>
+<h3>Implémentés: Vélib, Autolib, Géolocalisation automatique</h3>
 
 <form action="/CommentYAller/Coordinates" method="post">
     <h4>Point de départ: </h4>
     <p>
-        <input type="text" name="latitude_depart" value="48,847106" />
-        <input type="text" name="longitude_depart" value="2,340441" />
+        <input type="text" id="lad" name="latitude_depart" value="48,847106" />
+        <input type="text" id="lod" name="longitude_depart" value="2,340441" />
     </p>
 
 
@@ -22,4 +22,24 @@
 
     <input type="submit" value="Comment y aller ?" />
 </form>
+<button onclick="getLocation()">Me géolocaliser</button>
+
+<script>
+    var x = document.getElementById("lad");
+    var y = document.getElementById("lod");
+
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            z.innerHTML = "Geolocation is not supported by this browser.";
+        }
+    }
+
+    function showPosition(position) {
+        x.value = position.coords.latitude.toString().replace(".", ",");
+        y.value = position.coords.longitude.toString().replace(".", ",");
+    }
+</script>
 
