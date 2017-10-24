@@ -245,19 +245,59 @@ namespace comment_y_aller.Controllers
             return Routes;
         }
 
+        public static double GetPrecipitation(Record Depart, String rayon, DateTime date)
+        {
+            List<OpenDataSoftRecord> result = new List<OpenDataSoftRecord>();
+
+            string depart = Depart.fields.position[0].ToString().Replace(',', '.') + "," + Depart.fields.position[1].ToString().Replace(',', '.');
+
+            string url = string.Format("https" + "://data.opendatasoft.com/api/records/1.0/search/?dataset=arome-0025-sp1_sp2_paris%40public&rows=-1&sort=forecast&geofilter.distance=" + depart + "," + rayon);
+
+            url = string.Format(url);
+
+            WebClient client = new WebClient();
+
+            string response = client.DownloadString(url);
+
+            var requestObject = JsonConvert.DeserializeObject<OpenDataSoftRootObject>(response);
+
+            foreach (OpenDataSoftRecord record in requestObject.records)
+            {
+
+                if (record.fields.forecast == date)
+                {
+                    result.Add(record);
+                }
+            }
+            Console.WriteLine(result[1].fields.forecast);
+            Console.WriteLine(result[1].fields.total_water_precipitation);
+            Console.WriteLine(result[1].fields.position[1] + " " + result[0].fields.position[0]);
+            Double precipitation = result.Max(a => a.fields.total_water_precipitation);
+
+
+            return precipitation;
+        }
+
         public static double RouteCost(MapsRootObject Route, Record depart, Record arrivee)
         {
-            MapsRootObject RouteAvant = new MapsRootObject();
-            MapsRootObject RouteApres = new MapsRootObject();
-            //Record StationDepart = new Record(Route.routes[0].legs[0].start_location.lat, Route.routes[0].legs[0].start_location.lng);
-            //Record StationArrivee = new Record(Route.routes[0].legs[0].end_location.lat, Route.routes[0].legs[0].end_location.lng);
-            //RouteAvant = GetRoute(depart, StationDepart, "walking");
-            //RouteApres = GetRoute(StationArrivee, arrivee, "walking");
+            double precipitation = GetPrecipitation(depart, "1800", DateTime.Now);
+            precipitation = Math.Max(precipitation, 1);
+
             int cost = 0;
             foreach (Route route in Route.routes)
             {
                 foreach (Leg leg in route.legs)
                 {
+                    if (leg.steps[0].travel_mode == "walking")
+                    {
+                        cost += (int)Math.Floor((double)leg.duration.value * precipitation);
+
+                    }
+                    if (leg.steps[0].travel_mode == "bicycling")
+                    {
+                        cost += Convert.ToInt32(precipitation > 5.0) * 999999;
+                    }
+
                     cost += leg.duration.value;
                 }
             }
