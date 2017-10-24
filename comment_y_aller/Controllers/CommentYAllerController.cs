@@ -245,8 +245,10 @@ namespace comment_y_aller.Controllers
             return Routes;
         }
 
-        public static double GetPrecipitation(Record Depart, String rayon, DateTime date)
+        public static double GetPrecipitation(Record Depart, String rayon)
         {
+            DateTime date = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, 00, 00);
+
             List<OpenDataSoftRecord> result = new List<OpenDataSoftRecord>();
 
             string depart = Depart.fields.position[0].ToString().Replace(',', '.') + "," + Depart.fields.position[1].ToString().Replace(',', '.');
@@ -280,7 +282,7 @@ namespace comment_y_aller.Controllers
 
         public static double RouteCost(MapsRootObject Route, Record depart, Record arrivee)
         {
-            double precipitation = GetPrecipitation(depart, "1800", DateTime.Now);
+            double precipitation = GetPrecipitation(depart, "1800");// DateTime.Now);
             precipitation = Math.Max(precipitation, 1);
 
             int cost = 0;
