@@ -373,6 +373,10 @@ namespace comment_y_aller.Controllers
 
             List<MapsRootObject> Routes = GetPossibleRoutes(DeparturePointsVelib, ArrivalPointsVelib).Concat(GetPossibleRoutes(DeparturePointsAutolib, ArrivalPointsAutolib)).ToList();
 
+            MapsRootObject MetroRoute = GetRoute(Departure, Arrival, "transit");
+
+            Routes.Add(MetroRoute);
+
             MapsRootObject BestRoute = MeilleureRoute(Routes, Departure, Arrival);
 
             
