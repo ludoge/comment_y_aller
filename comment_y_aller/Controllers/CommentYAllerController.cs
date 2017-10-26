@@ -13,6 +13,10 @@ namespace comment_y_aller.Controllers
 {
     public class CommentYAllerController : Controller
     {
+        public const string Key = "AIzaSyCKE-qC-H_55fQY-A6T9htgSbvLPVHmyrw";
+
+        //Obtains all stations with available vehicles (if depart) or available slots (otherwise) of the specified type.
+        //1 call to OpenDataParis API
         public static List<Record> GetPoints(VehiculeLib Type, bool depart = true)
         {
             List<Record> result = new List<Record>();
@@ -150,7 +154,7 @@ namespace comment_y_aller.Controllers
         }
         public static MapsRootObject GetRoute(string depart, string arrivee, Mode mode)
         {
-            string url = "https" + "://maps.googleapis.com/maps/api/directions/json?origin=" + depart + "&destination=" + arrivee + "&mode=" + mode.ToString() + "&key=AIzaSyCKE-qC-H_55fQY-A6T9htgSbvLPVHmyrw";
+            string url = "https" + "://maps.googleapis.com/maps/api/directions/json?origin=" + depart + "&destination=" + arrivee + "&mode=" + mode.ToString() + "&key=" + Key +"&language=fr";
             url = string.Format(url);
 
             //Console.WriteLine(url);
