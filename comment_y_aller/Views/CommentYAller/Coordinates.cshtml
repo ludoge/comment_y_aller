@@ -14,6 +14,9 @@
         case "transit":
             advice = "métro";
             break;
+        case "walking":
+            advice = "pied";
+            break;
         default:
             advice = "téléportation";
             break;
@@ -35,6 +38,7 @@
             @foreach (Step step in leg.steps)
             {
                 <p>@Html.Raw(step.html_instructions)</p>
+                <p>@step.travel_mode</p>
             }
         }
     }

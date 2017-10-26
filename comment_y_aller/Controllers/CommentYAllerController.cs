@@ -291,17 +291,20 @@ namespace comment_y_aller.Controllers
             {
                 foreach (Leg leg in route.legs)
                 {
-                    if (leg.steps[0].travel_mode == "walking")
+                    foreach (Step step in leg.steps)
                     {
-                        cost += (int)Math.Floor((double)leg.duration.value * precipitation);
+                        if (step.travel_mode == "walking")
+                        {
+                            cost += (int)Math.Floor((double)leg.duration.value * precipitation);
 
-                    }
-                    if (leg.steps[0].travel_mode == "bicycling")
-                    {
-                        cost += Convert.ToInt32(precipitation > 5.0) * 999999;
-                    }
+                        }
+                        if (step.travel_mode == "bicycling")
+                        {
+                            cost += Convert.ToInt32(precipitation > 5.0) * 999999;
+                        }
 
-                    cost += leg.duration.value;
+                        cost += step.duration.value; 
+                    }
                 }
             }
             return cost;
@@ -380,20 +383,28 @@ namespace comment_y_aller.Controllers
 
             MapsRootObject BestRoute = MeilleureRoute(Routes, Departure, Arrival);
 
-            
-            String mode = BestRoute.routes[0].legs[1].steps[0].travel_mode.ToLower();
-            ViewData["mode"] = mode;
+
+            String mode;
 
             List<String> Instructions = new List<String>();
             foreach (Leg leg in BestRoute.routes[0].legs)
             {
                 foreach (Step step in leg.steps)
                 {
-                    Instructions.Add(step.html_instructions);
+                    if(step.travel_mode.ToLower() != "walking")
+                    {
+                        mode = step.travel_mode;
+                        goto exitLoop;
+                    }
+                
                 }
             }
+            mode = "walking";
+            exitLoop: { }
+                
             ViewData["Route"] = BestRoute;
 
+            ViewData["mode"] = mode.ToLower();
             return View();
         }        
     }
