@@ -13,15 +13,16 @@ namespace comment_y_aller.Controllers
 {
     public class CommentYAllerController : Controller
     {
-        public static List<Record> GetPoints(String type = "velib", bool depart = true)
+        public static List<Record> GetPoints(VehiculeLib Type, bool depart = true)
         {
             List<Record> result = new List<Record>();
 
             WebClient client = new WebClient();
 
+
             String response;
 
-            if (type == "velib")
+            if (Type == VehiculeLib.vélib)
             {
 
                 if (depart)
@@ -33,7 +34,7 @@ namespace comment_y_aller.Controllers
                     response = client.DownloadString("https://opendata.paris.fr/api/records/1.0/search/?dataset=stations-velib-disponibilites-en-temps-reel&facet=banking&facet=bonus&facet=status&facet=contract_name&facet=available_bikes&refine.status=OPEN&exclude.available_bike_stands=0&rows=-1");
                 }
             }
-            else if (type == "autolib")
+            else if (Type == VehiculeLib.autolib)
             {
                 if (depart)
                 {
@@ -46,7 +47,7 @@ namespace comment_y_aller.Controllers
             }
             else
             {
-                response = "test";
+                response = "Métro ???";
             }
 
             var requestObject = JsonConvert.DeserializeObject<ParisRootObject>(response);
@@ -112,7 +113,7 @@ namespace comment_y_aller.Controllers
             return Result;
         }
 
-        public static MapsRootObject GetRoute(Record Depart, Record Arrivee, string mode)
+        public static MapsRootObject GetRoute(Record Depart, Record Arrivee, Mode mode)
         {
             string depart;
             string arrivee;
@@ -140,16 +141,16 @@ namespace comment_y_aller.Controllers
             return GetRoute(depart, arrivee, mode);
         }
 
-        public static MapsRootObject GetRoute(List<Double> Depart, List<Double> Arrivee, string mode)
+        public static MapsRootObject GetRoute(List<Double> Depart, List<Double> Arrivee, Mode mode)
         {
             string depart = Depart[0].ToString().Replace(',', '.') + "," + Depart[1].ToString().Replace(',', '.');
             string arrivee = Arrivee[0].ToString().Replace(',', '.') + "," + Arrivee[1].ToString().Replace(',', '.');
 
             return GetRoute(depart, arrivee, mode);
         }
-        public static MapsRootObject GetRoute(string depart, string arrivee, string mode)
+        public static MapsRootObject GetRoute(string depart, string arrivee, Mode mode)
         {
-            string url = "https" + "://maps.googleapis.com/maps/api/directions/json?origin=" + depart + "&destination=" + arrivee + "&mode=" + mode + "&key=AIzaSyCKE-qC-H_55fQY-A6T9htgSbvLPVHmyrw";
+            string url = "https" + "://maps.googleapis.com/maps/api/directions/json?origin=" + depart + "&destination=" + arrivee + "&mode=" + mode.ToString() + "&key=AIzaSyCKE-qC-H_55fQY-A6T9htgSbvLPVHmyrw";
             url = string.Format(url);
 
             //Console.WriteLine(url);
@@ -172,7 +173,7 @@ namespace comment_y_aller.Controllers
 
             return requestObject;
         }
-        public static MapsRootObject GetRoute(List<Double> Depart, Record Arrivee, string mode)
+        public static MapsRootObject GetRoute(List<Double> Depart, Record Arrivee, Mode mode)
         {
             string depart = Depart[0].ToString().Replace(',', '.') + "," + Depart[1].ToString().Replace(',', '.');
             string arrivee;
@@ -186,7 +187,7 @@ namespace comment_y_aller.Controllers
             }
             return GetRoute(depart, arrivee, mode);
         }
-        public static MapsRootObject GetRoute(Record Depart, List<Double> Arrivee, string mode)
+        public static MapsRootObject GetRoute(Record Depart, List<Double> Arrivee, Mode mode)
         {
             string depart;
             try
@@ -200,12 +201,12 @@ namespace comment_y_aller.Controllers
             string arrivee = Arrivee[0].ToString().Replace(',', '.') + "," + Arrivee[1].ToString().Replace(',', '.');
             return GetRoute(depart, arrivee, mode);
         }
-        public static MapsRootObject GetRoute(List<Double> Depart, string arrivee, string mode)
+        public static MapsRootObject GetRoute(List<Double> Depart, string arrivee, Mode mode)
         {
             string depart = Depart[0].ToString().Replace(',', '.') + "," + Depart[1].ToString().Replace(',', '.');
             return GetRoute(depart, arrivee, mode);
         }
-        public static MapsRootObject GetRoute(string depart, List<Double> Arrivee, string mode)
+        public static MapsRootObject GetRoute(string depart, List<Double> Arrivee, Mode mode)
         {
             string arrivee = Arrivee[0].ToString().Replace(',', '.') + "," + Arrivee[1].ToString().Replace(',', '.');
             return GetRoute(depart, arrivee, mode);
@@ -224,7 +225,7 @@ namespace comment_y_aller.Controllers
                 {
                     foreach (Record ArrivalPoint in ArrivalPoints)
                     {
-                        Routes.Add(GetRoute(DeparturePoint, ArrivalPoint, "bicycling"));
+                        Routes.Add(GetRoute(DeparturePoint, ArrivalPoint, Mode.bicycling));
                     }
                 }
             }
@@ -236,7 +237,7 @@ namespace comment_y_aller.Controllers
                 {
                     foreach (Record ArrivalPoint in ArrivalPoints)
                     {
-                        Routes.Add(GetRoute(DeparturePoint, ArrivalPoint, "driving"));
+                        Routes.Add(GetRoute(DeparturePoint, ArrivalPoint, Mode.driving));
                     }
                 }
             }
@@ -313,8 +314,8 @@ namespace comment_y_aller.Controllers
             {
                 List<Double> RouteStartingPoint = new List<double> { Route.routes[0].legs[0].start_location.lat, Route.routes[0].legs[0].start_location.lng };
                 List<Double> RouteArrivalPoint = new List<double> { Route.routes.Last().legs.Last().end_location.lat, Route.routes.Last().legs.Last().end_location.lng };
-                MapsRootObject RouteBefore = GetRoute(start, RouteStartingPoint, "walking");
-                MapsRootObject RouteAfter = GetRoute(RouteArrivalPoint, finish, "walking");
+                MapsRootObject RouteBefore = GetRoute(start, RouteStartingPoint, Mode.walking);
+                MapsRootObject RouteAfter = GetRoute(RouteArrivalPoint, finish, Mode.walking);
 
                 Route.routes[0].legs.Insert(0, RouteBefore.routes[0].legs[0]);
                 Route.routes[0].legs.Add(RouteAfter.routes[0].legs[0]);
@@ -361,19 +362,19 @@ namespace comment_y_aller.Controllers
 
             Record Arrival = new Record(latitude_arriv, longitude_arriv);
 
-            List<Record> PossibleDeparturePointsVelib = GetPoints("velib", true);
-            List<Record> PossibleArrivalPointsVelib = GetPoints("velib", false);
+            List<Record> PossibleDeparturePointsVelib = GetPoints(VehiculeLib.vélib, true);
+            List<Record> PossibleArrivalPointsVelib = GetPoints(VehiculeLib.vélib, false);
             List<Record> DeparturePointsVelib = NPlusProches(PossibleDeparturePointsVelib, Departure, 2);
             List<Record> ArrivalPointsVelib = NPlusProches(PossibleDeparturePointsVelib, Arrival, 2);
 
-            List<Record> PossibleDeparturePointsAutolib = GetPoints("autolib", true);
-            List<Record> PossibleArrivalPointsAutolib = GetPoints("autolib", false);
+            List<Record> PossibleDeparturePointsAutolib = GetPoints(VehiculeLib.vélib, true);
+            List<Record> PossibleArrivalPointsAutolib = GetPoints(VehiculeLib.vélib, false);
             List<Record> DeparturePointsAutolib = NPlusProches(PossibleDeparturePointsAutolib, Departure, 2);
             List<Record> ArrivalPointsAutolib = NPlusProches(PossibleDeparturePointsAutolib, Arrival, 2);
 
             List<MapsRootObject> Routes = GetPossibleRoutes(DeparturePointsVelib, ArrivalPointsVelib).Concat(GetPossibleRoutes(DeparturePointsAutolib, ArrivalPointsAutolib)).ToList();
 
-            MapsRootObject MetroRoute = GetRoute(Departure, Arrival, "transit");
+            MapsRootObject MetroRoute = GetRoute(Departure, Arrival, Mode.transit);
 
             Routes.Add(MetroRoute);
 
@@ -394,19 +395,6 @@ namespace comment_y_aller.Controllers
             ViewData["Route"] = BestRoute;
 
             return View();
-        }
-
-        public IActionResult Debug()
-        {
-            List<Record> Points = GetPoints();
-            List<String> Result = new List<String>();
-            foreach (Record point in Points)
-            {
-                Result.Add(point.fields.address) ;
-            }
-            ViewData["trace"] = Result;
-            return View();
-        }
-        
+        }        
     }
 }
