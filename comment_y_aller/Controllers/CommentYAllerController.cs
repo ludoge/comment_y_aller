@@ -285,10 +285,9 @@ namespace comment_y_aller.Controllers
             return precipitation;
         }
 
-        public static double RouteCost(MapsRootObject Route, Record depart, Record arrivee)
+        public static double RouteCost(MapsRootObject Route, Record depart, Record arrivee, decimal poids)
         {
             double precipitation = GetPrecipitation(depart, "1800");// DateTime.Now);
-            precipitation = Math.Max(precipitation, 1);
 
             int cost = 0;
             foreach (Route route in Route.routes)
@@ -299,15 +298,20 @@ namespace comment_y_aller.Controllers
                     {
                         if (step.travel_mode == "walking")
                         {
-                            cost += (int)Math.Floor((double)leg.duration.value * precipitation);
-
+                            cost += (int)Math.Floor((double)leg.duration.value * (1 + precipitation / 10) * (1+Convert.ToInt32(poids)/10));
                         }
-                        if (step.travel_mode == "bicycling")
+                        else if (step.travel_mode == "bicycling" && (precipitation > 5.0 || poids > 10))
                         {
-                            cost += Convert.ToInt32(precipitation > 5.0) * 999999;
+                            cost += 999999999;
                         }
-
-                        cost += step.duration.value; 
+                        else if (step.travel_mode == "bicycling" && precipitation <= 5.0 && poids <= 10)
+                        {
+                            cost += (int)Math.Floor((double)leg.duration.value * (1 + precipitation/10) * (1 + Convert.ToInt32(poids) / 10));
+                        }
+                        else
+                        {
+                            cost += step.duration.value;
+                        }
                     }
                 }
             }
@@ -319,13 +323,19 @@ namespace comment_y_aller.Controllers
         {
             try
             {
-                List<Double> RouteStartingPoint = new List<double> { Route.routes[0].legs[0].start_location.lat, Route.routes[0].legs[0].start_location.lng };
-                List<Double> RouteArrivalPoint = new List<double> { Route.routes.Last().legs.Last().end_location.lat, Route.routes.Last().legs.Last().end_location.lng };
-                MapsRootObject RouteBefore = GetRoute(start, RouteStartingPoint, Mode.walking);
-                MapsRootObject RouteAfter = GetRoute(RouteArrivalPoint, finish, Mode.walking);
+                if (Route.routes[0].legs[0].steps[1].travel_mode == "TRANSIT")
+                {
+                }
+                else
+                {
+                    List<Double> RouteStartingPoint = new List<double> { Route.routes[0].legs[0].start_location.lat, Route.routes[0].legs[0].start_location.lng };
+                    List<Double> RouteArrivalPoint = new List<double> { Route.routes.Last().legs.Last().end_location.lat, Route.routes.Last().legs.Last().end_location.lng };
+                    MapsRootObject RouteBefore = GetRoute(start, RouteStartingPoint, Mode.walking);
+                    MapsRootObject RouteAfter = GetRoute(RouteArrivalPoint, finish, Mode.walking);
 
-                Route.routes[0].legs.Insert(0, RouteBefore.routes[0].legs[0]);
-                Route.routes[0].legs.Add(RouteAfter.routes[0].legs[0]);
+                    Route.routes[0].legs.Insert(0, RouteBefore.routes[0].legs[0]);
+                    Route.routes[0].legs.Add(RouteAfter.routes[0].legs[0]);
+                }
 
             }
             catch (Exception)
@@ -335,11 +345,11 @@ namespace comment_y_aller.Controllers
         }
 
 
-        static MapsRootObject MeilleureRoute(List<MapsRootObject> Routes, Record depart, Record arrivee)
+        static MapsRootObject MeilleureRoute(List<MapsRootObject> Routes, Record depart, Record arrivee, decimal poids)
         {
             List<MapsRootObject> Result = new List<MapsRootObject>();
 
-            Result = Routes.OrderBy(keySelector: Route => RouteCost(Route, depart, arrivee)).ToList();
+            Result = Routes.OrderBy(keySelector: Route => RouteCost(Route, depart, arrivee, poids)).ToList();
 
             Result = Result.Take(1).ToList();
 
@@ -357,6 +367,10 @@ namespace comment_y_aller.Controllers
             decimal longitude_depart = Convert.ToDecimal(form["longitude_depart"]);
             decimal latitude_arriv = Convert.ToDecimal(form["latitude_arriv"]);
             decimal longitude_arriv = Convert.ToDecimal(form["longitude_arriv"]);
+            decimal poids_porte = Convert.ToDecimal(form["poids_porte"]);
+            bool autolib = Convert.ToBoolean(form["autolib"]);
+            bool velib = Convert.ToBoolean(form["velib"]);
+            bool metro = Convert.ToBoolean(form["metro"]);
 
             //ViewData["latitude_depart"] = latitude_depart.ToString();
             //ViewData["longitude_depart"] = longitude_depart.ToString();
@@ -379,13 +393,22 @@ namespace comment_y_aller.Controllers
             List<Record> DeparturePointsAutolib = NPlusProches(PossibleDeparturePointsAutolib, Departure, 2);
             List<Record> ArrivalPointsAutolib = NPlusProches(PossibleDeparturePointsAutolib, Arrival, 2);
 
-            List<MapsRootObject> Routes = GetPossibleRoutes(DeparturePointsVelib, ArrivalPointsVelib).Concat(GetPossibleRoutes(DeparturePointsAutolib, ArrivalPointsAutolib)).ToList();
+            List<MapsRootObject> Routes = new List<MapsRootObject>();
+            if (velib)
+            {
+                Routes = Routes.Concat(GetPossibleRoutes(DeparturePointsVelib, ArrivalPointsVelib)).ToList();
+            }
+            if (autolib)
+            {
+                Routes = Routes.Concat(GetPossibleRoutes(DeparturePointsAutolib, ArrivalPointsAutolib)).ToList();
+            }
+            if (metro)
+            {
+                MapsRootObject MetroRoute = GetRoute(Departure, Arrival, Mode.transit);
+                Routes.Add(MetroRoute);
+            }
 
-            MapsRootObject MetroRoute = GetRoute(Departure, Arrival, Mode.transit);
-
-            Routes.Add(MetroRoute);
-
-            MapsRootObject BestRoute = MeilleureRoute(Routes, Departure, Arrival);
+            MapsRootObject BestRoute = MeilleureRoute(Routes, Departure, Arrival, poids_porte);
 
 
             String mode;
