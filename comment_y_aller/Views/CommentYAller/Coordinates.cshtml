@@ -39,37 +39,64 @@
 
 <h3>Instructions: </h3>
 
-    @foreach (Route route in Route.routes)
+    @if (advice == "métro")
     {
-        @foreach (Leg leg in route.legs)
+        foreach(Step step in Route.routes[0].legs[0].steps)
         {
-            @if(leg.steps[0].travel_mode== "DRIVING")
+            if (step.travel_mode == "TRANSIT")
             {
-                <h3>Tu es arrivé à la station Autolib.
-                    Voici le chemin que tu vas suivre en voiture (durée: @leg.duration.text.ToString()):</h3>
-
+                <h3>
+                    Prendre le @step.transit_details.line.vehicle.name.ToString() à la station @step.transit_details.departure_stop.name.ToString()
+                </h3>
+                <h3>Ligne @step.transit_details.line.short_name.ToString() (durée: @step.duration.text.ToString())</h3>
+                <p>Prendre la direction @step.transit_details.headsign.ToString()</p>
+                <p>Descendre à @step.transit_details.arrival_stop.name.ToString() (@step.transit_details.num_stops.ToString() stations)</p>
             }
-            @if (leg.steps[0].travel_mode == "BICYCLING")
+            else
             {
-                <h3>Tu es arrivé à la station Vélib.
-                    Voici le chemin que tu vas suivre en vélo (durée: @leg.duration.text.ToString()):</h3>
-
+                if ((Route.routes[0].legs[0].steps.IndexOf(step) == Route.routes[0].legs[0].steps.Count) || (Route.routes[0].legs[0].steps.IndexOf(step) == 0))
+                {
+                    <h3>Marche à pied (durée: @step.duration.text.ToString())</h3>
+                    <p>@Html.Raw(step.html_instructions)</p>
+                }
+                else
+                {
+                    <h3>Changement (durée: @step.duration.text.ToString())</h3>
+                }
             }
-            @if (leg.steps[0].travel_mode == "TRANSIT")
+        }
+    }
+    else
+    {
+        @foreach (Route route in Route.routes)
+        {
+            @foreach (Leg leg in route.legs)
             {
-                <h3>Tu es arrivé à la station Métro.
-                    Voici le chemin que tu vas suivre en train (durée: @leg.duration.text.ToString()):</h3>
+                @if (leg.steps[0].travel_mode == "DRIVING")
+                {
+                    <h3>
+                        Tu es arrivé à la station Autolib.
+                        Voici le chemin que tu vas suivre en voiture (durée: @leg.duration.text.ToString()):
+                    </h3>
 
-            }
-            @if (leg.steps[0].travel_mode == "WALKING")
-            {
-                <h3>Marche à pied (durée: @leg.duration.text.ToString())</h3>
+                }
+                @if (leg.steps[0].travel_mode == "BICYCLING")
+                {
+                    <h3>
+                        Tu es arrivé à la station Vélib.
+                        Voici le chemin que tu vas suivre en vélo (durée: @leg.duration.text.ToString()):
+                    </h3>
 
-            }
-            @foreach (Step step in leg.steps)
-            {
-                <p>@Html.Raw(step.html_instructions)</p>
-                <p>@step.travel_mode</p>
+                }
+                @if (leg.steps[0].travel_mode == "WALKING")
+                {
+                    <h3>Marche à pied (durée: @leg.duration.text.ToString())</h3>
+
+                }
+                @foreach (Step step in leg.steps)
+                {
+                    <p>@Html.Raw(step.html_instructions)</p>
+                }
             }
         }
     }
