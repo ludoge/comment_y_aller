@@ -3,37 +3,108 @@
     ViewData["Title"] = "View";
 }
 
-<h2>Comment y aller ?</h2>
-<h3>Implémentés: Vélib, Autolib, Métro, Géolocalisation automatique</h3>
-
-<form action="/CommentYAller/Coordinates" method="post">
-    <h4>Point de départ: </h4>
-    <p>
-        <input type="text" id="lad" name="latitude_depart" value="48,847106" />
-        <input type="text" id="lod" name="longitude_depart" value="2,340441" />
-    </p>
 
 
-    <h4>Point d'arrivée: </h4>
-    <p>
-        <input type="text" name="latitude_arriv" value="48,886705" />
-        <input type="text" name="longitude_arriv" value="2,347589" />
-    </p>
+<div class="container">
+    <h2>Comment y aller ?</h2>
+    <h3>Implémentés: Vélib, Autolib, Métro, Géolocalisation automatique</h3>
 
-    <h4>Je porte quelque chose de lourd (sac, valise...) dont voici le poids approximatif: </h4>
-    <p>
-        <input type="text" name="poids_porte" value="0" />
-    </p>
 
-    <input type="submit" value="Comment y aller ?" />
-</form>
-<button onclick="getLocation()">Me géolocaliser</button>
+    <form action="/CommentYAller/Coordinates" method="post">
+        <h4>Point de départ: </h4>
+
+        <div class="row" id="coords_depart">
+            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="lad" name="latitude_depart" value="48,847106" placeholder="latitude"/></div>
+            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="lod" name="longitude_depart" value="2,340441" placeholder="longitude"/></div>
+            <div class="col-lg-2 col-sm-4"><button type="button" class="btn btn-primary" onclick="getLocation()">Me géolocaliser</button></div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4 col-sm-8">
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-location-arrow"></i></span>
+                    <input type="text" class="form-control" name="adresse_depart" placeholder="Adresse" />
+                </div>
+            </div>
+        </div>
+
+
+        <h4>Point d'arrivée: </h4>
+        <div class="row">
+            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" name="latitude_arriv" value="48,886705" placeholder="latitude"/></div>
+            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" name="longitude_arriv" value="2,347589" placeholder="longitude"/></div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4 col-sm-8">
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-location-arrow"></i></span>
+                    <input type="text" class="form-control" name="adresse_arriv" placeholder="Adresse" />
+                </div>
+            </div>
+        </div>
+
+        <h4>Je porte quelque chose de lourd (sac, valise...) dont voici le poids approximatif: </h4>
+        <div class="row">           
+            <div class="col-lg-2 col-sm-4">
+                <div class="input-group">
+                    <input type="number" class="form-control" placeholder="Charge" />
+                    <span class="input-group-addon">Kg</span>
+                </div>
+            </div>
+        </div>
+
+        <h4>J'estime ma tolérance à la pluie à:</h4>
+        <div class="row">
+            <div class="col-lg-4 col-sm-8">
+                <div class="range">
+                        <span><input type="range" min="0" max="10" value="5" step="1" name="tol" onchange="showValue(this.value)" /></span>
+                        <span class="input-group-addon" id="tol_disp">0</span>
+                </div>
+            </div>
+        </div>
+
+        <h4>Je voudrais me déplacer en:</h4>
+        <div class="row">
+            <div class="col-lg-2 col-sm-4">
+                <div class="checkbox">
+                    <label><input checked type="checkbox" value="" name="autolib"><strong>Autolib</strong> <i class="fa fa-car"></i></label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-2 col-sm-4">
+                <div class="checkbox">
+                    <label><input checked type="checkbox" value="" name="velib"><strong>Vélib</strong> <i class="fa fa-bicycle"></i></label>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-2 col-sm-4">
+                <div class="checkbox">
+                    <label><input checked type="checkbox" value="" name="metro"><strong>Métro</strong> <i class="fa fa-train"></i></label>
+                </div>
+            </div>
+        </div>
+        <div class="row" title="La téléportation n'est pas encore disponible à Paris">
+            <div class="col-lg-2 col-sm-4">
+                <div class="checkbox disabled">
+                    <label><input disabled type="checkbox" value="" name="teleportation"><strong>Téléportation</strong> <i class="fa fa-superpowers"></i></label>
+                </div>
+            </div>
+        </div>
+        </br>
+        <div class="row">
+            <div class="col-lg-2 col-sm-4">
+                <input type="submit" class="btn btn-info btn-block" value="Comment y aller ?" />
+            </div>
+        </div>
+    </form>
+</div>
 
 <script>
     var x = document.getElementById("lad");
     var y = document.getElementById("lod");
-
-
     function getLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showPosition);
@@ -41,10 +112,12 @@
             z.innerHTML = "Geolocation is not supported by this browser.";
         }
     }
-
     function showPosition(position) {
-        x.value = position.coords.latitude.toString().replace(".", ",");
-        y.value = position.coords.longitude.toString().replace(".", ",");
+        x.value = position.coords.latitude.toString().replace(".", ",").substring(0,9);
+        y.value = position.coords.longitude.toString().replace(".", ",").substring(0, 9);
+    }
+    function showValue(newValue) {
+        document.getElementById("tol_disp").innerHTML = newValue;
     }
 </script>
 
