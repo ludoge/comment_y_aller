@@ -368,9 +368,9 @@ namespace comment_y_aller.Controllers
             decimal latitude_arriv = Convert.ToDecimal(form["latitude_arriv"]);
             decimal longitude_arriv = Convert.ToDecimal(form["longitude_arriv"]);
             decimal poids_porte = Convert.ToDecimal(form["poids_porte"]);
-            bool autolib = Convert.ToBoolean(form["autolib"]);
-            bool velib = Convert.ToBoolean(form["velib"]);
-            bool metro = Convert.ToBoolean(form["metro"]);
+            bool autolib = (form["autolib"]=="on");
+            bool velib = (form["velib"]=="on");
+            bool metro = (form["metro"]=="on");
 
             //ViewData["latitude_depart"] = latitude_depart.ToString();
             //ViewData["longitude_depart"] = longitude_depart.ToString();
