@@ -5,12 +5,12 @@
 
 
 
-<div class="container">
+<div class="container" id="mainForm">
     <h2>Comment y aller ?</h2>
     <h3>Implémentés: Vélib, Autolib, Métro, Géolocalisation automatique</h3>
 
 
-    <form action="/CommentYAller/Coordinates" method="post">
+    <form action="/CommentYAller/Coordinates" method="post" onsubmit="loadingDisplay()">
         <h4>Point de départ: </h4>
 
         <div class="row" id="coords_depart">
@@ -96,15 +96,30 @@
         <br>
         <div class="row">
             <div class="col-lg-2 col-sm-4">
-                <input type="submit" class="btn btn-info btn-block" value="Comment y aller ?" />
+                <input onclick="loadingDisplay" type="submit" class="btn btn-info btn-block" value="Comment y aller ?"/>
             </div>
         </div>
     </form>
 </div>
 
+<div class="container" id="loading" style="display: none;">
+    <div>
+        <img src="~/images/loading.gif" class="img-responsive center-block" />
+    </div>
+</div>
+
 <script>
     var x = document.getElementById("lad");
     var y = document.getElementById("lod");
+
+    var main = document.getElementById("mainForm")
+    var loading = document.getElementById("loading")
+
+    function loadingDisplay() {
+        main.style.display = 'none';
+        loading.style.display = '';
+    }
+
     function getLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showPosition);
