@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  comment_y_aller:
+    image: comment_y_aller
+    build:
+      context: ./comment_y_aller
+      dockerfile: Dockerfile

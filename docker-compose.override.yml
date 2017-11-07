@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  comment_y_aller:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "80"

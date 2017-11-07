@@ -4,7 +4,7 @@
     String advice;
     MapsRootObject Route = (MapsRootObject)ViewData["Route"];
     int dureeTotale = 0;
-    for(int i =0; i < Route.routes[0].legs.Count();i++)
+    for (int i = 0; i < Route.routes[0].legs.Count(); i++)
     {
         dureeTotale = dureeTotale + Route.routes[0].legs[i].duration.value;
     }
@@ -30,38 +30,43 @@
     }
 }
 
-<h2>Je te conseille d'y aller en
-    @advice
-    ! Durée:
-    @dureeEnMinutes minutes
-    </h2>
+<div class="container">
+    <h3 class="text-justify">
+        Je te conseille d'y aller en
+        <B>@advice</B>
+        ! Durée:
+        <span class="badge">@dureeEnMinutes minutes</span>
+    </h3>
+</div>
 
 
-<h3>Instructions: </h3>
+<div class="container">
+    <h3>Instructions: </h3>
 
     @if (advice == "métro")
     {
-        foreach(Step step in Route.routes[0].legs[0].steps)
+        foreach (Step step in Route.routes[0].legs[0].steps)
         {
             if (step.travel_mode == "TRANSIT")
             {
-                <h3>
+                <h4>
+                    <i class="fa fa-train"></i><i class="@step.transit_details.line.vehicle.icon.ToString()"></i>
                     Prendre le @step.transit_details.line.vehicle.name.ToString() à la station @step.transit_details.departure_stop.name.ToString()
-                </h3>
-                <h3>Ligne @step.transit_details.line.short_name.ToString() (durée: @step.duration.text.ToString())</h3>
+                </h4>
+                <h3>Ligne @step.transit_details.line.short_name.ToString() <span class="badge">@step.duration.text.ToString()</span></h3>
                 <p>Prendre la direction @step.transit_details.headsign.ToString()</p>
-                <p>Descendre à @step.transit_details.arrival_stop.name.ToString() (@step.transit_details.num_stops.ToString() stations)</p>
+                <p>Descendre à @step.transit_details.arrival_stop.name.ToString() <span class="badge">@step.transit_details.num_stops.ToString() stations</span></p>
             }
             else
             {
-                if ((Route.routes[0].legs[0].steps.IndexOf(step) == Route.routes[0].legs[0].steps.Count) || (Route.routes[0].legs[0].steps.IndexOf(step) == 0))
+                if ((Route.routes[0].legs[0].steps.IndexOf(step) == Route.routes[0].legs[0].steps.Count - 1) || (Route.routes[0].legs[0].steps.IndexOf(step) == 0))
                 {
-                    <h3>Marche à pied (durée: @step.duration.text.ToString())</h3>
+                    <h4><i class="fa fa-male" aria-hidden="true"></i> Marche à pied <span class="badge">@step.duration.text.ToString()</span></h4>
                     <p>@Html.Raw(step.html_instructions)</p>
                 }
                 else
                 {
-                    <h3>Changement (durée: @step.duration.text.ToString())</h3>
+                    <h4><i class="fa fa-male" aria-hidden="true"></i> Changement <span class="badge">@step.duration.text.ToString()</span></h4>
                 }
             }
         }
@@ -74,23 +79,25 @@
             {
                 @if (leg.steps[0].travel_mode == "DRIVING")
                 {
-                    <h3>
+                    <h4>
+                        <i class="fa fa-car"></i>
                         Tu es arrivé à la station Autolib.
-                        Voici le chemin que tu vas suivre en voiture (durée: @leg.duration.text.ToString()):
-                    </h3>
+                        Voici le chemin que tu vas suivre en voiture <span class="badge">@leg.duration.text.ToString()</span>:
+                    </h4>
 
                 }
                 @if (leg.steps[0].travel_mode == "BICYCLING")
                 {
-                    <h3>
+                    <h4>
+                        <i class="fa fa-bicycle"></i>
                         Tu es arrivé à la station Vélib.
-                        Voici le chemin que tu vas suivre en vélo (durée: @leg.duration.text.ToString()):
-                    </h3>
+                        Voici le chemin que tu vas suivre en vélo <span class="badge">@leg.duration.text.ToString()</span>:
+                    </h4>
 
                 }
                 @if (leg.steps[0].travel_mode == "WALKING")
                 {
-                    <h3>Marche à pied (durée: @leg.duration.text.ToString())</h3>
+                    <h4><i class="fa fa-male" aria-hidden="true"></i> Marche à pied <span class="badge">@leg.duration.text.ToString()</span></h4>
 
                 }
                 @foreach (Step step in leg.steps)
@@ -100,3 +107,4 @@
             }
         }
     }
+</div>
