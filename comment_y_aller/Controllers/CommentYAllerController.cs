@@ -277,9 +277,9 @@ namespace comment_y_aller.Controllers
                     result.Add(record);
                 }
             }
-            Console.WriteLine(result[1].fields.forecast);
-            Console.WriteLine(result[1].fields.total_water_precipitation);
-            Console.WriteLine(result[1].fields.position[1] + " " + result[0].fields.position[0]);
+            //Console.WriteLine(result[1].fields.forecast);
+            //Console.WriteLine(result[1].fields.total_water_precipitation);
+            //Console.WriteLine(result[1].fields.position[1] + " " + result[0].fields.position[0]);
             Double precipitation = result.Max(a => a.fields.total_water_precipitation);
 
 
@@ -288,7 +288,16 @@ namespace comment_y_aller.Controllers
 
         public static double RouteCost(MapsRootObject Route, Record depart, Record arrivee, decimal poids)
         {
-            double precipitation = GetPrecipitation(depart, "1800");// DateTime.Now);
+            double precipitation;
+
+            try
+            {
+                precipitation = GetPrecipitation(depart, "1800");// DateTime.Now);
+            }
+            catch (Exception)
+            {
+                precipitation = 0;
+            }
 
             int cost = 0;
             foreach (Route route in Route.routes)
@@ -324,7 +333,7 @@ namespace comment_y_aller.Controllers
         {
             try
             {
-                if (Route.routes[0].legs[0].steps[1].travel_mode == "TRANSIT")
+                if (Route.routes[0].legs[0].steps[1].travel_mode == "TRANSIT" || Route.routes[0].legs[0].steps[0].travel_mode == "TRANSIT")
                 {
                 }
                 else
@@ -388,13 +397,13 @@ namespace comment_y_aller.Controllers
 
             List<Record> PossibleDeparturePointsVelib = GetPoints(VehiculeLib.vélib, true);
             List<Record> PossibleArrivalPointsVelib = GetPoints(VehiculeLib.vélib, false);
-            List<Record> DeparturePointsVelib = NPlusProches(PossibleDeparturePointsVelib, Departure, 2);
-            List<Record> ArrivalPointsVelib = NPlusProches(PossibleDeparturePointsVelib, Arrival, 2);
+            List<Record> DeparturePointsVelib = NPlusProches(PossibleDeparturePointsVelib, Departure, 1);
+            List<Record> ArrivalPointsVelib = NPlusProches(PossibleDeparturePointsVelib, Arrival, 1);
 
-            List<Record> PossibleDeparturePointsAutolib = GetPoints(VehiculeLib.vélib, true);
-            List<Record> PossibleArrivalPointsAutolib = GetPoints(VehiculeLib.vélib, false);
-            List<Record> DeparturePointsAutolib = NPlusProches(PossibleDeparturePointsAutolib, Departure, 2);
-            List<Record> ArrivalPointsAutolib = NPlusProches(PossibleDeparturePointsAutolib, Arrival, 2);
+            List<Record> PossibleDeparturePointsAutolib = GetPoints(VehiculeLib.autolib, true);
+            List<Record> PossibleArrivalPointsAutolib = GetPoints(VehiculeLib.autolib, false);
+            List<Record> DeparturePointsAutolib = NPlusProches(PossibleDeparturePointsAutolib, Departure, 1);
+            List<Record> ArrivalPointsAutolib = NPlusProches(PossibleDeparturePointsAutolib, Arrival, 1);
 
             List<MapsRootObject> Routes = new List<MapsRootObject>();
             if (velib)

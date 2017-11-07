@@ -3,11 +3,15 @@
     ViewData["Title"] = "View";
 }
 
-
+<div class="container" id="loading" style="display: none;">@*Loading animation, hidden by default*@
+    <div>
+        <img src="~/images/loading.gif" class="img-responsive center-block" />
+    </div>
+</div>
 
 <div class="container" id="mainForm">
     <h2>Comment y aller ?</h2>
-    <h3>Implémentés: Vélib, Autolib, Métro, Géolocalisation automatique</h3>
+    @*<h3>Implémentés: Vélib, Autolib, Métro, Géolocalisation automatique</h3>*@
 
 
     <form action="/CommentYAller/Coordinates" method="post" onsubmit="loadingDisplay()">
@@ -23,23 +27,21 @@
             <div class="col-lg-4 col-sm-8">
                 <div class="input-group">
                     <span class="input-group-addon"><i class="fa fa-location-arrow"></i></span>
-                    <input type="text" class="form-control" name="adresse_depart" placeholder="Adresse" />
+                    <input type="text" class="form-control" name="adresse_depart" placeholder="Adresse" id="Departure" onchange="getLatLngDepartDelayed()"/>
                 </div>
             </div>
         </div>
 
-
-        <h4>Point d'arrivée: </h4>
-        <div class="row">
-            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" name="latitude_arriv" value="48.886705" placeholder="latitude"/></div>
-            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" name="longitude_arriv" value="2.347589" placeholder="longitude"/></div>
+        <div class="row" id="coords_arriv">
+            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="laa" name="latitude_arriv" value="48.886705" placeholder="latitude" /></div>
+            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="loa" name="longitude_arriv" value="2.347589" placeholder="longitude" /></div>
         </div>
 
         <div class="row">
             <div class="col-lg-4 col-sm-8">
                 <div class="input-group">
                     <span class="input-group-addon"><i class="fa fa-location-arrow"></i></span>
-                    <input type="text" class="form-control" name="adresse_arriv" placeholder="Adresse" />
+                    <input type="text" class="form-control" name="adresse_arriv" placeholder="Adresse" id="Arrival" onchange="getLatLngArrivDelayed()"/>
                 </div>
             </div>
         </div>
@@ -102,11 +104,44 @@
     </form>
 </div>
 
-<div class="container" id="loading" style="display: none;">
-    <div>
-        <img src="~/images/loading.gif" class="img-responsive center-block" />
-    </div>
-</div>
+<script>
+    function getLatLngDepartDelayed() {
+        setTimeout(getLatLngDepart, 1);
+    }
+    function getLatLngDepart() {
+        var geocoder = new google.maps.Geocoder();
+        var address = document.getElementById('Departure').value;
+        geocoder.geocode({
+            'address': address
+        }, function (results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+                var latLng = results[0].geometry.location;
+                document.getElementById("lad").value = results[0].geometry.location.lat();
+                document.getElementById("lod").value = results[0].geometry.location.lng();
+            } else {
+                alert("Geocode was not successful for the following reason: " + status);
+            }
+        });
+    }
+    function getLatLngArrivDelayed() {
+        setTimeout(getLatLngArriv, 1);
+    }
+    function getLatLngArriv() {
+        var geocoder = new google.maps.Geocoder();
+        var address = document.getElementById('Arrival').value;
+        geocoder.geocode({
+            'address': address
+        }, function (results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+                var latLng = results[0].geometry.location;
+                document.getElementById("laa").value = results[0].geometry.location.lat();
+                document.getElementById("loa").value = results[0].geometry.location.lng();
+            } else {
+                alert("Geocode was not successful for the following reason: " + status);
+            }
+        });
+    }
+</script>
 
 <script>
     var x = document.getElementById("lad");
@@ -136,3 +171,27 @@
     }
 </script>
 
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDdlwaELns2awnl55_ar-WEk5FvEqD48kY&libraries=places&callback=initAutocomplete&language=fr"
+        async defer></script>
+
+<script>
+    function initAutocomplete() {
+        var input1 = document.getElementById('Arrival');
+        var input = document.getElementById('Departure');
+        var options = {
+            componentRestrictions: {country: 'fr'}
+        };
+
+        autocomplete = new google.maps.places.Autocomplete(input1, options);
+        autocomplete = new google.maps.places.Autocomplete(input, options);
+    }
+</script>
+
+<script type="text/javascript">
+    function stopEnterKey(evt) {
+        var evt = (evt) ? evt : ((event) ? event : null);
+        var node = (evt.target) ? evt.target : ((evt.srcElement) ? evt.srcElement : null);
+        if ((evt.keyCode == 13) && (node.type == "text")) { return false; }
+    }
+    document.onkeypress = stopEnterKey;
+</script>
