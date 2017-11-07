@@ -5,17 +5,17 @@
 
 
 
-<div class="container">
+<div class="container" id="mainForm">
     <h2>Comment y aller ?</h2>
     <h3>Implémentés: Vélib, Autolib, Métro, Géolocalisation automatique</h3>
 
 
-    <form action="/CommentYAller/Coordinates" method="post">
+    <form action="/CommentYAller/Coordinates" method="post" onsubmit="loadingDisplay()">
         <h4>Point de départ: </h4>
 
         <div class="row" id="coords_depart">
-            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="lad" name="latitude_depart" value="48,847106" placeholder="latitude"/></div>
-            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="lod" name="longitude_depart" value="2,340441" placeholder="longitude"/></div>
+            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="lad" name="latitude_depart" value="48.847106" placeholder="latitude"/></div>
+            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="lod" name="longitude_depart" value="2.340441" placeholder="longitude"/></div>
             <div class="col-lg-2 col-sm-4"><button type="button" class="btn btn-primary" onclick="getLocation()">Me géolocaliser</button></div>
         </div>
 
@@ -31,8 +31,8 @@
 
         <h4>Point d'arrivée: </h4>
         <div class="row">
-            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" name="latitude_arriv" value="48,886705" placeholder="latitude"/></div>
-            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" name="longitude_arriv" value="2,347589" placeholder="longitude"/></div>
+            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" name="latitude_arriv" value="48.886705" placeholder="latitude"/></div>
+            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" name="longitude_arriv" value="2.347589" placeholder="longitude"/></div>
         </div>
 
         <div class="row">
@@ -93,18 +93,33 @@
                 </div>
             </div>
         </div>
-        </br>
+        <br>
         <div class="row">
             <div class="col-lg-2 col-sm-4">
-                <input type="submit" class="btn btn-info btn-block" value="Comment y aller ?" />
+                <input onclick="loadingDisplay" type="submit" class="btn btn-info btn-block" value="Comment y aller ?"/>
             </div>
         </div>
     </form>
 </div>
 
+<div class="container" id="loading" style="display: none;">
+    <div>
+        <img src="~/images/loading.gif" class="img-responsive center-block" />
+    </div>
+</div>
+
 <script>
     var x = document.getElementById("lad");
     var y = document.getElementById("lod");
+
+    var main = document.getElementById("mainForm")
+    var loading = document.getElementById("loading")
+
+    function loadingDisplay() {
+        main.style.display = 'none';
+        loading.style.display = '';
+    }
+
     function getLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(showPosition);
@@ -113,8 +128,8 @@
         }
     }
     function showPosition(position) {
-        x.value = position.coords.latitude.toString().replace(".", ",").substring(0,9);
-        y.value = position.coords.longitude.toString().replace(".", ",").substring(0, 9);
+        x.value = position.coords.latitude.toString().replace(".", ".").substring(0,9);
+        y.value = position.coords.longitude.toString().replace(".", ".").substring(0, 9);
     }
     function showValue(newValue) {
         document.getElementById("tol_disp").innerHTML = newValue;

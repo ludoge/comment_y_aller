@@ -5,9 +5,4 @@
 
 <h2>Debug</h2>
 
-<ul>
-    @foreach (string traceElement in (List<String>)ViewData["trace"])
-    {
-        <li>@traceElement</li>
-    }
-</ul>
+@ViewData["debug"]

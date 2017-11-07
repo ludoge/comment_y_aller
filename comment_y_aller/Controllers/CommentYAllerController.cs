@@ -154,6 +154,7 @@ namespace comment_y_aller.Controllers
         }
         public static MapsRootObject GetRoute(string depart, string arrivee, Mode mode)
         {
+
             string url = "https" + "://maps.googleapis.com/maps/api/directions/json?origin=" + depart + "&destination=" + arrivee + "&mode=" + mode.ToString() + "&key=" + Key +"&language=fr";
             url = string.Format(url);
 
@@ -372,6 +373,8 @@ namespace comment_y_aller.Controllers
             bool velib = (form["velib"]=="on");
             bool metro = (form["metro"]=="on");
 
+
+
             //ViewData["latitude_depart"] = latitude_depart.ToString();
             //ViewData["longitude_depart"] = longitude_depart.ToString();
             //ViewData["latitude_arriv"] = latitude_arriv.ToString();
@@ -434,5 +437,27 @@ namespace comment_y_aller.Controllers
             ViewData["mode"] = mode.ToLower();
             return View();
         }        
+
+        public IActionResult Debug(IFormCollection form)
+        {
+            decimal latitude_depart = Convert.ToDecimal(form["latitude_depart"]);
+            decimal longitude_depart = Convert.ToDecimal(form["longitude_depart"]);
+            decimal latitude_arriv = Convert.ToDecimal(form["latitude_arriv"]);
+            decimal longitude_arriv = Convert.ToDecimal(form["longitude_arriv"]);
+            decimal poids_porte = Convert.ToDecimal(form["poids_porte"]);
+            bool autolib = (form["autolib"] == "on");
+            bool velib = (form["velib"] == "on");
+            bool metro = (form["metro"] == "on");
+
+            Record Departure = new Record(latitude_depart, longitude_depart);
+
+            Record Arrival = new Record(latitude_arriv, longitude_arriv);
+
+            WebClient client = new WebClient();
+            string response = client.DownloadString("https://opendata.paris.fr/api/records/1.0/search/?dataset=stations-velib-disponibilites-en-temps-reel&facet=banking&facet=bonus&facet=status&facet=contract_name&facet=available_bikes&refine.status=OPEN&exclude.available_bikes=0&rows=-1");
+
+            ViewData["debug"] = response;
+            return View();
+        }
     }
 }
