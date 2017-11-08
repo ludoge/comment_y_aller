@@ -18,23 +18,22 @@
         <h4>Point de départ: </h4>
 
         <div class="row" id="coords_depart">
-            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="lad" name="latitude_depart" value="48.847106" placeholder="latitude"/></div>
-            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="lod" name="longitude_depart" value="2.340441" placeholder="longitude"/></div>
-            <div class="col-lg-2 col-sm-4"><button type="button" class="btn btn-primary" onclick="getLocation()">Me géolocaliser</button></div>
+            <div class="col-lg-2 col-sm-4"><input disabled type="text" class="form-control" id="lad" name="latitude_depart" value="48.847106" placeholder="latitude"/></div>
+            <div class="col-lg-2 col-sm-4"><input disabled type="text" class="form-control" id="lod" name="longitude_depart" value="2.340441" placeholder="longitude"/></div>
         </div>
 
         <div class="row">
             <div class="col-lg-4 col-sm-8">
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fa fa-location-arrow"></i></span>
+                    <span class="input-group-btn"><button type="button" class="btn btn-primary" onclick="getLocation()"><i class="fa fa-location-arrow"></i></button></span>
                     <input type="text" class="form-control" name="adresse_depart" placeholder="Adresse" id="Departure" onchange="getLatLngDepartDelayed()"/>
                 </div>
             </div>
         </div>
 
         <div class="row" id="coords_arriv">
-            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="laa" name="latitude_arriv" value="48.886705" placeholder="latitude" /></div>
-            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="loa" name="longitude_arriv" value="2.347589" placeholder="longitude" /></div>
+            <div class="col-lg-2 col-sm-4"><input disabled type="text" class="form-control" id="laa" name="latitude_arriv" value="48.886705" placeholder="latitude" /></div>
+            <div class="col-lg-2 col-sm-4"><input disabled type="text" class="form-control" id="loa" name="longitude_arriv" value="2.347589" placeholder="longitude" /></div>
         </div>
 
         <div class="row">
@@ -116,8 +115,8 @@
         }, function (results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
                 var latLng = results[0].geometry.location;
-                document.getElementById("lad").value = results[0].geometry.location.lat();
-                document.getElementById("lod").value = results[0].geometry.location.lng();
+                document.getElementById("lad").value = results[0].geometry.location.lat().toString().replace(".", ".").substring(0, 9);
+                document.getElementById("lod").value = results[0].geometry.location.lng().toString().replace(".", ".").substring(0, 9);
             } else {
                 alert("Geocode was not successful for the following reason: " + status);
             }
@@ -134,8 +133,8 @@
         }, function (results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
                 var latLng = results[0].geometry.location;
-                document.getElementById("laa").value = results[0].geometry.location.lat();
-                document.getElementById("loa").value = results[0].geometry.location.lng();
+                document.getElementById("laa").value = results[0].geometry.location.lat().toString().replace(".", ".").substring(0, 9);
+                document.getElementById("loa").value = results[0].geometry.location.lng().toString().replace(".", ".").substring(0, 9);
             } else {
                 alert("Geocode was not successful for the following reason: " + status);
             }
