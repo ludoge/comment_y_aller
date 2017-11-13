@@ -3,4 +3,4 @@ ARG source
 WORKDIR /app
 EXPOSE 80
 COPY ${source:-obj/Docker/publish} .
-ENTRYPOINT ["dotnet", "comment_y_aller.dll"]
+ENTRYPOINT ["dotnet", "run", "-p", "comment_y_aller.csproj"]
