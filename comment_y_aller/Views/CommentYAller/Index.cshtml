@@ -55,12 +55,23 @@
             </div>
         </div>
 
-        <h4>J'estime ma tolérance à la pluie à:</h4>
-        <div class="row">
-            <div class="col-lg-4 col-sm-8">
-                <div class="range">
+        <div id="weather-yes">
+            <h4>J'estime ma tolérance à la pluie à:</h4>
+            <div class="row">
+                <div class="col-lg-4 col-sm-8">
+                    <div class="range">
                         <span><input type="range" min="0" max="10" value="5" step="1" name="tol" onchange="showValue(this.value)" /></span>
                         <span class="input-group-addon" id="tol_disp">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="weather-no" style="display: none">
+            <div class="row">
+                <div class="col-lg-4 col-sm-8">
+                    <div class="alert alert-warning">
+                        <i class="fa fa-warning"></i>Les données météo ne sont pas disponibles
+                    </div>
                 </div>
             </div>
         </div>
@@ -193,4 +204,38 @@
         if ((evt.keyCode == 13) && (node.type == "text")) { return false; }
     }
     document.onkeypress = stopEnterKey;
+</script>
+<script>
+
+    var now = new Date();
+
+    function httpGet(theUrl) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", theUrl, false); // false for synchronous request
+        xmlHttp.send(null);
+        return xmlHttp.responseText;
+    }
+
+    var text = httpGet("https://data.opendatasoft.com/api/records/1.0/search/?dataset=prevision-meteo-paris-arome%40datailedefrance&rows=-1&sort=-forecast&geofilter.distance=48.853390%2C+2.348774%2C+1800")
+
+    obj = JSON.parse(text);
+    document.getElementById("demo").innerHTML = text; //Math.floor(Date.parse(obj.records[0].fields.forecast)/60/60);
+
+    var weather_available = false;
+    var len = obj.records.length;
+
+    for (var i = 0; i < len; i++) {
+        var dd = new Date(Date.parse(obj.records[i].fields.forecast));
+        if (dd.getHours() == now.getHours() && dd.getDate() == dd.getDate()) {
+            weather_available = true;
+            break;
+        }
+    }
+    var weather_yes = document.getElementById("weather-yes");
+    var weather_no = document.getElementById("weather-no");
+
+    if (!weather_available) {
+        weather_yes.style.display = 'none';
+        weather_no.style.display = '';
+    }
 </script>

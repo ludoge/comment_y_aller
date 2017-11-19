@@ -13,6 +13,7 @@ namespace comment_y_aller.Controllers
 {
     public class CommentYAllerController : Controller
     {
+        //Google Maps API key
         public const string Key = "AIzaSyCKE-qC-H_55fQY-A6T9htgSbvLPVHmyrw";
 
         //Obtains all stations with available vehicles (if depart) or available slots (otherwise) of the specified type.
@@ -51,7 +52,7 @@ namespace comment_y_aller.Controllers
             }
             else
             {
-                response = "Métro ???";
+                response = ""; //This can't happen, the method would throw an error earlier...
             }
 
             var requestObject = JsonConvert.DeserializeObject<ParisRootObject>(response);
@@ -64,7 +65,8 @@ namespace comment_y_aller.Controllers
             return result;
         }
 
-        static double CalculDistance(Record Point1, Record Point2)
+        //Distance between any two points on Earth
+        static double GeometricDistance(Record Point1, Record Point2)
         {
 
             double lat1; double lat2; double lon1; double lon2;
@@ -110,7 +112,7 @@ namespace comment_y_aller.Controllers
         {
             List<Record> Result = new List<Record>();
 
-            Result = Stations.OrderBy(keySelector: Station => CalculDistance(Station, Location)).ToList();
+            Result = Stations.OrderBy(keySelector: Station => GeometricDistance(Station, Location)).ToList();
 
             Result = Result.Take(numberOfPoints).ToList();
 
@@ -144,7 +146,6 @@ namespace comment_y_aller.Controllers
 
             return GetRoute(depart, arrivee, mode);
         }
-
         public static MapsRootObject GetRoute(List<Double> Depart, List<Double> Arrivee, Mode mode)
         {
             string depart = Depart[0].ToString().Replace(',', '.') + "," + Depart[1].ToString().Replace(',', '.');
@@ -217,14 +218,13 @@ namespace comment_y_aller.Controllers
             return GetRoute(depart, arrivee, mode);
         }
 
-
         public static List<MapsRootObject> GetPossibleRoutes(List<Record> DeparturePoints, List<Record> ArrivalPoints)
         {
             List<MapsRootObject> Routes = new List<MapsRootObject>();
 
             //Velib
 
-            if (DeparturePoints[0].fields.position != null)
+            if (DeparturePoints[0].fields.position != null)//THe API occasionally returns weird data or empty routes, this accounts for that
             {
                 foreach (Record DeparturePoint in DeparturePoints)
                 {
@@ -277,22 +277,16 @@ namespace comment_y_aller.Controllers
                     result.Add(record);
                 }
             }
-            //Console.WriteLine(result[1].fields.forecast);
-            //Console.WriteLine(result[1].fields.total_water_precipitation);
-            //Console.WriteLine(result[1].fields.position[1] + " " + result[0].fields.position[0]);
             Double precipitation = result.Max(a => a.fields.total_water_precipitation);
-
-
             return precipitation;
         }
 
         public static double RouteCost(MapsRootObject Route, Record depart, Record arrivee, decimal poids)
         {
             double precipitation;
-
             try
             {
-                precipitation = GetPrecipitation(depart, "1800");// DateTime.Now);
+                precipitation = GetPrecipitation(depart, "1800");
             }
             catch (Exception)
             {
@@ -326,9 +320,9 @@ namespace comment_y_aller.Controllers
                 }
             }
             return cost;
-            //return Route.routes[0].legs[0].duration.value + RouteAvant.routes[0].legs[0].duration.value + RouteApres.routes[0].legs[0].duration.value;
         }
 
+        //Adds walk to/from Vélib/Autolib point
         public static MapsRootObject CompleteRoute(MapsRootObject Route, Record start, Record finish)
         {
             try
@@ -346,7 +340,6 @@ namespace comment_y_aller.Controllers
                     Route.routes[0].legs.Insert(0, RouteBefore.routes[0].legs[0]);
                     Route.routes[0].legs.Add(RouteAfter.routes[0].legs[0]);
                 }
-
             }
             catch (Exception)
             {
@@ -373,6 +366,7 @@ namespace comment_y_aller.Controllers
 
         public IActionResult Coordinates(IFormCollection form)
         {
+            //Get all the data from form
             decimal latitude_depart = Convert.ToDecimal(form["latitude_depart"]);
             decimal longitude_depart = Convert.ToDecimal(form["longitude_depart"]);
             decimal latitude_arriv = Convert.ToDecimal(form["latitude_arriv"]);
@@ -383,16 +377,7 @@ namespace comment_y_aller.Controllers
             bool metro = (form["metro"]=="on");
 
 
-
-            //ViewData["latitude_depart"] = latitude_depart.ToString();
-            //ViewData["longitude_depart"] = longitude_depart.ToString();
-            //ViewData["latitude_arriv"] = latitude_arriv.ToString();
-            //ViewData["longitude_arriv"] = longitude_arriv.ToString();
-
-
-
             Record Departure = new Record(latitude_depart, longitude_depart);
-
             Record Arrival = new Record(latitude_arriv, longitude_arriv);
 
             List<Record> PossibleDeparturePointsVelib = GetPoints(VehiculeLib.vélib, true);
@@ -422,9 +407,8 @@ namespace comment_y_aller.Controllers
 
             MapsRootObject BestRoute = MeilleureRoute(Routes, Departure, Arrival, poids_porte);
 
-
+            //Extracting primary travel mode from route
             String mode;
-
             List<String> Instructions = new List<String>();
             foreach (Leg leg in BestRoute.routes[0].legs)
             {
@@ -446,27 +430,5 @@ namespace comment_y_aller.Controllers
             ViewData["mode"] = mode.ToLower();
             return View();
         }        
-
-        public IActionResult Debug(IFormCollection form)
-        {
-            decimal latitude_depart = Convert.ToDecimal(form["latitude_depart"]);
-            decimal longitude_depart = Convert.ToDecimal(form["longitude_depart"]);
-            decimal latitude_arriv = Convert.ToDecimal(form["latitude_arriv"]);
-            decimal longitude_arriv = Convert.ToDecimal(form["longitude_arriv"]);
-            decimal poids_porte = Convert.ToDecimal(form["poids_porte"]);
-            bool autolib = (form["autolib"] == "on");
-            bool velib = (form["velib"] == "on");
-            bool metro = (form["metro"] == "on");
-
-            Record Departure = new Record(latitude_depart, longitude_depart);
-
-            Record Arrival = new Record(latitude_arriv, longitude_arriv);
-
-            WebClient client = new WebClient();
-            string response = client.DownloadString("https://opendata.paris.fr/api/records/1.0/search/?dataset=stations-velib-disponibilites-en-temps-reel&facet=banking&facet=bonus&facet=status&facet=contract_name&facet=available_bikes&refine.status=OPEN&exclude.available_bikes=0&rows=-1");
-
-            ViewData["debug"] = response;
-            return View();
-        }
     }
 }
