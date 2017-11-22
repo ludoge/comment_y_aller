@@ -373,10 +373,15 @@ namespace comment_y_aller.Controllers
 
         public IActionResult Coordinates(IFormCollection form)
         {
-            decimal latitude_depart = Convert.ToDecimal(form["latitude_depart"]);
-            decimal longitude_depart = Convert.ToDecimal(form["longitude_depart"]);
-            decimal latitude_arriv = Convert.ToDecimal(form["latitude_arriv"]);
-            decimal longitude_arriv = Convert.ToDecimal(form["longitude_arriv"]);
+            string lad = (string)form["latitude_depart"];
+            string lod = (string)form["longitude_depart"];
+            string laa = (string)form["latitude_arriv"];
+            string loa = (string)form["longitude_arriv"];
+
+            decimal latitude_depart = Math.Min(Convert.ToDecimal(lad), Convert.ToDecimal(lad.Replace(".",","))); //Corrects for locale-dependant parsing...
+            decimal longitude_depart = Math.Min(Convert.ToDecimal(lod), Convert.ToDecimal(lod.Replace(".", ",")));
+            decimal latitude_arriv = Math.Min(Convert.ToDecimal(laa), Convert.ToDecimal(laa.Replace(".", ",")));
+            decimal longitude_arriv = Math.Min(Convert.ToDecimal(loa), Convert.ToDecimal(loa.Replace(".", ",")));
             decimal poids_porte = Convert.ToDecimal(form["poids_porte"]);
             bool autolib = (form["autolib"]=="on");
             bool velib = (form["velib"]=="on");
