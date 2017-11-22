@@ -3,10 +3,11 @@
     ViewData["Title"] = "View";
 }
 
-<div class="container" id="loading" style="display: none;">@*Loading animation, hidden by default*@
-    <div>
-        <img src="~/images/loading.gif" class="img-responsive center-block" />
-    </div>
+<div class="container" id="loading" style="display: none;">
+    @*Loading animation, hidden by default*@
+<div>
+    <img src="~/images/loading.gif" class="img-responsive center-block" />
+</div>
 </div>
 
 <div class="container" id="mainForm">
@@ -18,16 +19,15 @@
         <h4>Point de départ: </h4>
 
         <div class="row" id="coords_depart">
-            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="lad" name="latitude_depart" value="48.847106" placeholder="latitude"/></div>
-            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="lod" name="longitude_depart" value="2.340441" placeholder="longitude"/></div>
-            <div class="col-lg-2 col-sm-4"><button type="button" class="btn btn-primary" onclick="getLocation()">Me géolocaliser</button></div>
+            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="lad" name="latitude_depart" value="48.847106" placeholder="latitude" /></div>
+            <div class="col-lg-2 col-sm-4"><input type="text" class="form-control" id="lod" name="longitude_depart" value="2.340441" placeholder="longitude" /></div>
         </div>
 
         <div class="row">
             <div class="col-lg-4 col-sm-8">
                 <div class="input-group">
-                    <span class="input-group-addon"><i class="fa fa-location-arrow"></i></span>
-                    <input type="text" class="form-control" name="adresse_depart" placeholder="Adresse" id="Departure" onchange="getLatLngDepartDelayed()"/>
+                    <span class="input-group-btn"><button type="button" class="btn btn-primary" onclick="getLocation()"><i class="fa fa-location-arrow"></i></button></span>
+                    <input type="text" class="form-control" name="adresse_depart" placeholder="Adresse" id="Departure" onchange="getLatLngDepartDelayed()" />
                 </div>
             </div>
         </div>
@@ -41,13 +41,13 @@
             <div class="col-lg-4 col-sm-8">
                 <div class="input-group">
                     <span class="input-group-addon"><i class="fa fa-location-arrow"></i></span>
-                    <input type="text" class="form-control" name="adresse_arriv" placeholder="Adresse" id="Arrival" onchange="getLatLngArrivDelayed()"/>
+                    <input type="text" class="form-control" name="adresse_arriv" placeholder="Adresse" id="Arrival" onchange="getLatLngArrivDelayed()" />
                 </div>
             </div>
         </div>
 
         <h4>Je porte quelque chose de lourd (sac, valise...) dont voici le poids approximatif: </h4>
-        <div class="row">           
+        <div class="row">
             <div class="col-lg-2 col-sm-4">
                 <div class="input-group">
                     <input type="number" class="form-control" placeholder="Charge" />
@@ -56,12 +56,23 @@
             </div>
         </div>
 
-        <h4>J'estime ma tolérance à la pluie à:</h4>
-        <div class="row">
-            <div class="col-lg-4 col-sm-8">
-                <div class="range">
+        <div id="weather-yes">
+            <h4>J'estime ma tolérance à la pluie à:</h4>
+            <div class="row">
+                <div class="col-lg-4 col-sm-8">
+                    <div class="range">
                         <span><input type="range" min="0" max="10" value="5" step="1" name="tol" onchange="showValue(this.value)" /></span>
                         <span class="input-group-addon" id="tol_disp">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="weather-no" style="display: none">
+            <div class="row">
+                <div class="col-lg-4 col-sm-8">
+                    <div class="alert alert-warning">
+                        <i class="fa fa-warning"></i>Les données météo ne sont pas disponibles
+                    </div>
                 </div>
             </div>
         </div>
@@ -98,7 +109,7 @@
         <br>
         <div class="row">
             <div class="col-lg-2 col-sm-4">
-                <input onclick="loadingDisplay" type="submit" class="btn btn-info btn-block" value="Comment y aller ?"/>
+                <input onclick="loadingDisplay" type="submit" class="btn btn-info btn-block" value="Comment y aller ?" />
             </div>
         </div>
     </form>
@@ -116,8 +127,8 @@
         }, function (results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
                 var latLng = results[0].geometry.location;
-                document.getElementById("lad").value = results[0].geometry.location.lat();
-                document.getElementById("lod").value = results[0].geometry.location.lng();
+                document.getElementById("lad").value = results[0].geometry.location.lat().toString().replace(".", ".").substring(0, 9);
+                document.getElementById("lod").value = results[0].geometry.location.lng().toString().replace(".", ".").substring(0, 9);
             } else {
                 alert("Geocode was not successful for the following reason: " + status);
             }
@@ -134,8 +145,8 @@
         }, function (results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
                 var latLng = results[0].geometry.location;
-                document.getElementById("laa").value = results[0].geometry.location.lat();
-                document.getElementById("loa").value = results[0].geometry.location.lng();
+                document.getElementById("laa").value = results[0].geometry.location.lat().toString().replace(".", ".").substring(0, 9);
+                document.getElementById("loa").value = results[0].geometry.location.lng().toString().replace(".", ".").substring(0, 9);
             } else {
                 alert("Geocode was not successful for the following reason: " + status);
             }
@@ -163,7 +174,7 @@
         }
     }
     function showPosition(position) {
-        x.value = position.coords.latitude.toString().replace(".", ".").substring(0,9);
+        x.value = position.coords.latitude.toString().replace(".", ".").substring(0, 9);
         y.value = position.coords.longitude.toString().replace(".", ".").substring(0, 9);
     }
     function showValue(newValue) {
@@ -179,7 +190,7 @@
         var input1 = document.getElementById('Arrival');
         var input = document.getElementById('Departure');
         var options = {
-            componentRestrictions: {country: 'fr'}
+            componentRestrictions: { country: 'fr' }
         };
 
         autocomplete = new google.maps.places.Autocomplete(input1, options);
@@ -194,4 +205,38 @@
         if ((evt.keyCode == 13) && (node.type == "text")) { return false; }
     }
     document.onkeypress = stopEnterKey;
+</script>
+<script>
+
+    var now = new Date();
+
+    function httpGet(theUrl) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", theUrl, false); // false for synchronous request
+        xmlHttp.send(null);
+        return xmlHttp.responseText;
+    }
+
+    var text = httpGet("https://data.opendatasoft.com/api/records/1.0/search/?dataset=prevision-meteo-paris-arome%40datailedefrance&rows=-1&sort=-forecast&geofilter.distance=48.853390%2C+2.348774%2C+1800")
+
+    obj = JSON.parse(text);
+    document.getElementById("demo").innerHTML = text; //Math.floor(Date.parse(obj.records[0].fields.forecast)/60/60);
+
+    var weather_available = false;
+    var len = obj.records.length;
+
+    for (var i = 0; i < len; i++) {
+        var dd = new Date(Date.parse(obj.records[i].fields.forecast));
+        if (dd.getHours() == now.getHours() && dd.getDate() == dd.getDate()) {
+            weather_available = true;
+            break;
+        }
+    }
+    var weather_yes = document.getElementById("weather-yes");
+    var weather_no = document.getElementById("weather-no");
+
+    if (!weather_available) {
+        weather_yes.style.display = 'none';
+        weather_no.style.display = '';
+    }
 </script>

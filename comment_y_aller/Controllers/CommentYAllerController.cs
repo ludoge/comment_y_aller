@@ -51,7 +51,7 @@ namespace comment_y_aller.Controllers
             }
             else
             {
-                response = "Métro ???";
+                response = "This never happens thanks to enums";
             }
 
             var requestObject = JsonConvert.DeserializeObject<ParisRootObject>(response);
@@ -64,6 +64,8 @@ namespace comment_y_aller.Controllers
             return result;
         }
 
+
+        //Geometric distance between any two points on (spherical) earth
         static double CalculDistance(Record Point1, Record Point2)
         {
 
@@ -106,6 +108,7 @@ namespace comment_y_aller.Controllers
             return dist;
         }
 
+        //Gets the closest stations to desired point
         static List<Record> NPlusProches(List<Record> Stations, Record Location, int numberOfPoints)
         {
             List<Record> Result = new List<Record>();
@@ -117,6 +120,8 @@ namespace comment_y_aller.Controllers
             return Result;
         }
 
+
+        //Calls Google Maps API to get the main route, with lots of polymorphism
         public static MapsRootObject GetRoute(Record Depart, Record Arrivee, Mode mode)
         {
             string depart;
@@ -138,13 +143,8 @@ namespace comment_y_aller.Controllers
             {
                 arrivee = Arrivee.fields.geo_point[0].ToString().Replace(',', '.') + "," + Arrivee.fields.geo_point[1].ToString().Replace(',', '.');
             }
-
-            //string depart = Depart.fields.position[0].ToString();
-            //string arrivee = Arrivee.fields.position[0].ToString();
-
             return GetRoute(depart, arrivee, mode);
         }
-
         public static MapsRootObject GetRoute(List<Double> Depart, List<Double> Arrivee, Mode mode)
         {
             string depart = Depart[0].ToString().Replace(',', '.') + "," + Depart[1].ToString().Replace(',', '.');
@@ -217,7 +217,6 @@ namespace comment_y_aller.Controllers
             return GetRoute(depart, arrivee, mode);
         }
 
-
         public static List<MapsRootObject> GetPossibleRoutes(List<Record> DeparturePoints, List<Record> ArrivalPoints)
         {
             List<MapsRootObject> Routes = new List<MapsRootObject>();
@@ -286,6 +285,8 @@ namespace comment_y_aller.Controllers
             return precipitation;
         }
 
+
+        //Computes "cost" of following route; base cost is walking time in seconds
         public static double RouteCost(MapsRootObject Route, Record depart, Record arrivee, decimal poids)
         {
             double precipitation;
@@ -373,6 +374,7 @@ namespace comment_y_aller.Controllers
 
         public IActionResult Coordinates(IFormCollection form)
         {
+            //Processing form data
             string lad = (string)form["latitude_depart"];
             string lod = (string)form["longitude_depart"];
             string laa = (string)form["latitude_arriv"];
@@ -386,15 +388,6 @@ namespace comment_y_aller.Controllers
             bool autolib = (form["autolib"]=="on");
             bool velib = (form["velib"]=="on");
             bool metro = (form["metro"]=="on");
-
-
-
-            //ViewData["latitude_depart"] = latitude_depart.ToString();
-            //ViewData["longitude_depart"] = longitude_depart.ToString();
-            //ViewData["latitude_arriv"] = latitude_arriv.ToString();
-            //ViewData["longitude_arriv"] = longitude_arriv.ToString();
-
-
 
             Record Departure = new Record(latitude_depart, longitude_depart);
 
@@ -410,6 +403,7 @@ namespace comment_y_aller.Controllers
             List<Record> DeparturePointsAutolib = NPlusProches(PossibleDeparturePointsAutolib, Departure, 1);
             List<Record> ArrivalPointsAutolib = NPlusProches(PossibleDeparturePointsAutolib, Arrival, 1);
 
+            //Generating all possible routes
             List<MapsRootObject> Routes = new List<MapsRootObject>();
             if (velib)
             {
@@ -427,7 +421,7 @@ namespace comment_y_aller.Controllers
 
             MapsRootObject BestRoute = MeilleureRoute(Routes, Departure, Arrival, poids_porte);
 
-
+            //Preparing data for output
             String mode;
 
             List<String> Instructions = new List<String>();
@@ -452,7 +446,7 @@ namespace comment_y_aller.Controllers
             return View();
         }        
 
-        public IActionResult Debug(IFormCollection form)
+        /*public IActionResult Debug(IFormCollection form)
         {
             decimal latitude_depart = Convert.ToDecimal(form["latitude_depart"]);
             decimal longitude_depart = Convert.ToDecimal(form["longitude_depart"]);
@@ -472,6 +466,6 @@ namespace comment_y_aller.Controllers
 
             ViewData["debug"] = response;
             return View();
-        }
+        }*/
     }
 }
